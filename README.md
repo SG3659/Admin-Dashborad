@@ -1,7 +1,7 @@
 | Route | Method | Description |
 |-------|-------------|----------|
 | http://localhost:8000/api/cars/createCar | `POST` | Create Car Deatils to show in listing |
-| http://localhost:8000/api/user/signup | `POST` | create Admin Email (eg:name@examole.com) |
+| http://localhost:8000/api/user/signup | `POST` | create Admin Email (eg:name@example.com) |
 
 This is json example for Admin Email register
 {
