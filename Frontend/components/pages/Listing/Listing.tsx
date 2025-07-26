@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNotification } from "@/contexts/notification-context"
 import { Loader2 } from "lucide-react"
 import axiosConfig from "@/services/axiosConfig"
+import authAxiosConfig from "@/services/authAxiosConfig"
 export default function ListingsPage() {
    const [listings, setListings] = useState<CarListing[]>([])
    const [loading, setLoading] = useState(true)
@@ -21,7 +22,7 @@ export default function ListingsPage() {
    const fetchListings = async () => {
       setLoading(true)
       try {
-         const response = await axiosConfig.get(`/api/cars/fetchCar?page=${currentPage}&limit=10`)
+         const response = await axiosConfig.get(`/api/cars/fetchCar?page=${currentPage}&limit=10&status=${statusFilter}`)
          const data = response.data as {
             data: CarListing[]
          }
@@ -50,7 +51,7 @@ export default function ListingsPage() {
 
    const handleStatusChange = async (listingId: string, action: "APPROVED" | "REJECTED", adminEmail: string, car_id: string) => {
       try {
-         const response = await axiosConfig.post(`/api/audit/editAudit/${listingId}`, { action, adminEmail, car_id })
+         const response = await authAxiosConfig.post(`/api/audit/editAudit/${listingId}`, { action, adminEmail, car_id })
 
          if (response.status === 200) {
             addNotification({
@@ -75,13 +76,9 @@ export default function ListingsPage() {
 
    const handleEditSave = async (updatedListing: CarListing) => {
       try {
-         const response = await fetch(`http://localhost:8000/api/cars/editCar/${updatedListing.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedListing),
-         })
+         const response = await authAxiosConfig.patch(`http://localhost:8000/api/cars/editCar/${updatedListing.id}`, {...updatedListing})
 
-         if (response.ok) {
+         if (response.status == 200)   {
             addNotification({
                type: "success",
                title: "Success",
@@ -106,6 +103,23 @@ export default function ListingsPage() {
                <h1 className="text-3xl font-bold tracking-tight">Listings Management</h1>
                <p className="text-muted-foreground">Review and manage car rental listings</p>
             </div>
+            <Select
+               value={statusFilter}
+               onValueChange={(value: ListingStatus) => {
+                  setStatusFilter(value)
+                  setCurrentPage(1)
+               }}
+            >
+               <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+               </SelectTrigger>
+               <SelectContent>
+                  <SelectItem value="all">All Listings</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+               </SelectContent>
+            </Select>
          </div>
 
          {loading ? (

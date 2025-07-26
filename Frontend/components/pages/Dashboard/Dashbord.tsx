@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
    const fetcStats = async () => {
       try {
-         const response = await axiosConfig.get<FetchCarResponse>('/api/cars/fetchCar?limit=1&page=1')
+         const response = await axiosConfig.get<FetchCarResponse>('/api/cars/fetchCar?limit=1&page=1&status=all')
          // console.log(response.data?.pagination)
          setStats(response.data?.pagination)
          // Process the data as needed

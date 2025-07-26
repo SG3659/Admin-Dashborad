@@ -20,6 +20,16 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use('/api/user',userRouter);
 app.use('/api/cars',carsRouter);
 app.use('/api/audit',auditRouter);
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+  });
+});
 app.listen(port,()=>{
    console.log(`Server is running on http://localhost:${port}`);
 })

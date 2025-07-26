@@ -1,15 +1,14 @@
 import bcrypt from "bcrypt";
 import prisma from "../config/dbconfig.js";
-
-export const signup = async (req, res) => {
+import jwt from "jsonwebtoken";
+export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   try {
-
     const isValidEmail = /^[a-zA-Z0-9._%+-]+@example\.com$/.test(email);
-  if (!isValidEmail) {
-    return res.status(400).json({ error: "Only work emails are allowed." });
-  }
+    if (!isValidEmail) {
+      return res.status(400).json({ error: "Only work emails are allowed." });
+    }
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -27,23 +26,23 @@ export const signup = async (req, res) => {
         password: hashedPassword,
       },
     });
-     const { password: _, ...userWithoutPassword } = user;
-    return res.status(201).json({ message: "User created", user:userWithoutPassword });
+    const { password: _, ...userWithoutPassword } = user;
+    return res
+      .status(201)
+      .json({ message: "User created", user: userWithoutPassword });
   } catch (error) {
-    console.error("Signup error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 };
 
-
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
     const isValidEmail = /^[a-zA-Z0-9._%+-]+@example\.com$/.test(email);
-  if (!isValidEmail) {
-    return res.status(400).json({ error: "Only work emails are allowed." });
-  }
+    if (!isValidEmail) {
+      return res.status(400).json({ error: "Only work emails are allowed." });
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
@@ -56,13 +55,27 @@ export const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-       const { password: _, ...userWithoutPassword } = user;
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
 
-    return res.status(200).json({ message: "Login successful", user:userWithoutPassword });
+    res.cookie("token", token, {
+      path: "/",
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: "none", // cross-site access --> allow all third-party cookies
+      secure: true,
+    });
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res
+      .status(200)
+      .json({ message: "Login successful", user: userWithoutPassword, token });
   } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 };
-
-
