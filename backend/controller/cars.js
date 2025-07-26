@@ -1,4 +1,5 @@
 import prisma from "../config/dbconfig.js";
+import { errorHandler } from "../utils/error.js";
 
 export const createCarInfo = async (req, res, next) => {
   try {
@@ -23,7 +24,7 @@ export const createCarInfo = async (req, res, next) => {
       !location ||
       !imageUrl
     ) {
-      return res.status(400).json({ error: "All fields are required" });
+      return next(errorHandler(400, "All fields are required"));
     }
     const newCar = await prisma.car.create({
       data: {
@@ -133,7 +134,7 @@ export const editCarInfo = async (req, res, next) => {
   //   update.status = status.toUpperCase().trim();
   // }
   if (Object.keys(update).length === 0) {
-    return res.status(400).json({ error: "No valid fields to update" });
+    return next(errorHandler(400, "No valid fields to update"));
   }
   try {
     const car = await prisma.car.update({
@@ -158,7 +159,7 @@ export const fetchCarByID = async (req, res, next) => {
       },
     });
     if (!car) {
-      return res.status(404).json({ error: "Car not found" });
+      return next(errorHandler(404, "Car not found"));
     }
     return res.status(200).json({ data: car });
   } catch (error) {

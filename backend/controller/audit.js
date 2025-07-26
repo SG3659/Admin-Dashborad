@@ -1,5 +1,5 @@
 import prisma from "../config/dbconfig.js";
-
+import { errorHandler } from "../utils/error.js";
 export const fetchAudit = async (req, res, next) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
@@ -45,12 +45,12 @@ export const editAuditInfo = async (req, res, next) => {
   try {
     const { action, adminEmail, car_id } = req.body;
     if (!car_id || !action || !adminEmail) {
-      return res
-        .status(400)
-        .json({ error: "car_id, action, and adminName are required" });
+      return next(
+        errorHandler(400, "car_id, action, and adminEmail are required")
+      );
     }
     if (!["APPROVED", "REJECTED", "EDIT"].includes(action)) {
-      return res.status(400).json({ error: "Invalid action type" });
+      return next(errorHandler(400, "Invalid action type"));
     }
     const auditLog = await prisma.auditLog.create({
       data: {

@@ -1,18 +1,21 @@
 import bcrypt from "bcrypt";
 import prisma from "../config/dbconfig.js";
 import jwt from "jsonwebtoken";
+import { errorHandler } from "../utils/error.js";
 export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   try {
     const isValidEmail = /^[a-zA-Z0-9._%+-]+@example\.com$/.test(email);
     if (!isValidEmail) {
-      return res.status(400).json({ error: "Only work emails are allowed." });
+      return next(errorHandler(400, "Only work emails are allowed."));
+
     }
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
+      return next(errorHandler(400, "Email already in use"));
+
     }
 
     // Hash the password
@@ -41,19 +44,20 @@ export const login = async (req, res, next) => {
   try {
     const isValidEmail = /^[a-zA-Z0-9._%+-]+@example\.com$/.test(email);
     if (!isValidEmail) {
-      return res.status(400).json({ error: "Only work emails are allowed." });
+      return next(errorHandler(400, "Only work emails are allowed."));
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return next(errorHandler(401, "Invalid email or password"));
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+
+      return next(errorHandler(401, "Invalid email or password"));
     }
     const token = jwt.sign(
       { id: user.id, email: user.email },
