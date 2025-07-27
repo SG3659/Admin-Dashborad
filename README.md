@@ -1,7 +1,30 @@
+# Amin DashBoard 
+## Current Functionality:
+    ->  Full fledge  
+    ->  Dashboard of task Pending, Approved, Rejected.
+    ->  Listing 
+    ->  Aduit for maintainig what task hase done
+    
+## Future Functionality:
+    -> Implement a Ceo Dashbord Handle & Create All Admin Account.
+
+## Demo Vedio Link:
+    https://drive.google.com/drive/folders/1L3guPw8RdP9BVnYsf2CjFXVRgeV06eEP?usp=drive_link
+
+## website Screenshot Link:
+    https://drive.google.com/drive/folders/1P4pXpgJilfFYubJEHZeamJJGU_tnVLrF?usp=drive_link    
+
+
 | Route | Method | Description |
 |-------|-------------|----------|
-| http://localhost:8000/api/cars/createCar | `POST` | Create Car Deatils to show in listing |
-| http://localhost:8000/api/user/signup | `POST` | create Admin Email (eg:name@example.com) |
+| /user/signup          | `POST`  | create Admin Email (eg:name@example.com)     |
+| /cars/createCar       | `POST`  | Create Car Details to show in listing        |
+| /cars/fetchCar        | `GET`   | Fetch all Car Details                        |
+| /cars/fetchCar/:id    | `GET`   | Fetch Single Car Details by ID               |
+| /cars/editCar/:id     | `PATCH` | Edit Car Details (Auth & RateLimited Route)  |
+| /audit/fetchAudit     | `GET`   | Fetch all Audit Entries                      |
+| /audit/editAudit/:id  | `POST`  | Edit Audit Entry by ID (Auth & RateLimited)  |
+
 
 This is json example for Admin Email register
 {
